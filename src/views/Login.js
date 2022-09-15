@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import {
   Input,
   NativeBaseProvider,
@@ -10,21 +10,47 @@ import {
   Image,
   AspectRatio,
 } from "native-base";
-import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-// import { alignContent, flex, flexDirection, width } from "styled-system";
+//import { alignContent, flex, flexDirection, width } from 'styled-system';
 
-function Signup() {
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { firebaseConfig } from "../authentication/firebase-config";
+
+const Login = () => {
   const navigation = useNavigation();
+
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const handleLogin = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        console.log("User logged in");
+        const user = userCredential.user;
+        console.log(user);
+        Alert.alert("Bienvenido!");
+        navigation.replace("HomeScreen");
+      })
+      .catch((error) => {
+        console.log(error);
+        Alert.alert("Error", error.message);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.Middle}>
-        <Text style={styles.LoginText}>Registro</Text>
+        <Text style={styles.LoginText}>Inicio de sesión</Text>
       </View>
       <View style={styles.text2}>
-        <Text>¿Ya tienes cuenta? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.signupText}> Inicia sesión </Text>
+        <Text>¿No estás registrado? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+          <Text style={styles.signupText}> ¡Registrate!</Text>
         </TouchableOpacity>
       </View>
 
@@ -32,38 +58,10 @@ function Signup() {
       <View style={styles.buttonStyle}>
         <View style={styles.emailInput}>
           <Input
+            onChangeText={(text) => setEmail(text)} // This is the function that will be called when the text changes
             InputLeftElement={
               <Icon
                 as={<FontAwesome5 name="user-secret" />}
-                size="sm"
-                m={2}
-                _light={{
-                  color: "black",
-                }}
-                _dark={{
-                  color: "gray.300",
-                }}
-              />
-            }
-            variant="outline"
-            placeholder="Nombre de usuario"
-            _light={{
-              placeholderTextColor: "blueGray.400",
-            }}
-            _dark={{
-              placeholderTextColor: "blueGray.50",
-            }}
-          />
-        </View>
-      </View>
-
-      {/* Username or Email Input Field */}
-      <View style={styles.buttonStyleX}>
-        <View style={styles.emailInput}>
-          <Input
-            InputLeftElement={
-              <Icon
-                as={<MaterialCommunityIcons name="email" />}
                 size="sm"
                 m={2}
                 _light={{
@@ -90,6 +88,7 @@ function Signup() {
       <View style={styles.buttonStyleX}>
         <View style={styles.emailInput}>
           <Input
+            onChangeText={(text) => setPassword(text)} // This is the function that will be called when the text changes
             InputLeftElement={
               <Icon
                 as={<FontAwesome5 name="key" />}
@@ -116,39 +115,11 @@ function Signup() {
         </View>
       </View>
 
-      {/* Password Input Field */}
-      <View style={styles.buttonStyleX}>
-        <View style={styles.emailInput}>
-          <Input
-            InputLeftElement={
-              <Icon
-                as={<FontAwesome5 name="key" />}
-                size="sm"
-                m={2}
-                _light={{
-                  color: "black",
-                }}
-                _dark={{
-                  color: "gray.300",
-                }}
-              />
-            }
-            variant="outline"
-            secureTextEntry={true}
-            placeholder="Confirma contraseña"
-            _light={{
-              placeholderTextColor: "blueGray.400",
-            }}
-            _dark={{
-              placeholderTextColor: "blueGray.50",
-            }}
-          />
-        </View>
-      </View>
-
       {/* Button */}
       <View style={styles.buttonStyle}>
-        <Button style={styles.buttonDesign}>¡Registrar ahora!</Button>
+        <Button onPress={handleLogin} style={styles.buttonDesign}>
+          Ingresar
+        </Button>
       </View>
 
       {/* Line */}
@@ -250,12 +221,12 @@ function Signup() {
       <StatusBar style="auto" />
     </View>
   );
-}
+};
 
 export default () => {
   return (
     <NativeBaseProvider>
-      <Signup />
+      <Login />
     </NativeBaseProvider>
   );
 };

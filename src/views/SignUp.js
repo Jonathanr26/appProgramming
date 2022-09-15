@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import {
   Input,
   NativeBaseProvider,
@@ -10,25 +10,54 @@ import {
   Image,
   AspectRatio,
 } from "native-base";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-//import { alignContent, flex, flexDirection, width } from 'styled-system';
+// import { alignContent, flex, flexDirection, width } from "styled-system";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { firebaseConfig } from "../authentication/firebase-config";
 
-function Login() {
+const SignUp = () => {
   const navigation = useNavigation();
+
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const handleSignUp = () => {
+    
+    if(password !== confirmPassword) return Alert.alert("Error", "Las contraseñas no coinciden");
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        console.log("User created");
+        const user = userCredential.user;
+        console.log(user);
+        Alert.alert("Usuario registrado con éxito!");
+        navigation.navigate("Login");
+      })
+      .catch((error) => {
+        console.log(error);
+        Alert.alert("Error", error.message);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.Middle}>
-        <Text style={styles.LoginText}>Inicio de sesión</Text>
+        <Text style={styles.LoginText}>Registro</Text>
       </View>
       <View style={styles.text2}>
-        <Text>¿No estás registrado? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={styles.signupText}> ¡Registrate!</Text>
+        <Text>¿Ya tienes cuenta? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.signUpText}> Inicia sesión </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Username or Email Input Field */}
+      {/* Username Field */}
       <View style={styles.buttonStyle}>
         <View style={styles.emailInput}>
           <Input
@@ -46,7 +75,37 @@ function Login() {
               />
             }
             variant="outline"
-            placeholder="Nombre de usuario o correo electrónico"
+            placeholder="Nombre de usuario"
+            _light={{
+              placeholderTextColor: "blueGray.400",
+            }}
+            _dark={{
+              placeholderTextColor: "blueGray.50",
+            }}
+          />
+        </View>
+      </View>
+
+      {/* Email Input Field */}
+      <View style={styles.buttonStyleX}>
+        <View style={styles.emailInput}>
+          <Input
+            onChangeText={(text) => setEmail(text)} // This is the function that will be called when the text changes
+            InputLeftElement={
+              <Icon
+                as={<MaterialCommunityIcons name="email" />}
+                size="sm"
+                m={2}
+                _light={{
+                  color: "black",
+                }}
+                _dark={{
+                  color: "gray.300",
+                }}
+              />
+            }
+            variant="outline"
+            placeholder="Correo electrónico"
             _light={{
               placeholderTextColor: "blueGray.400",
             }}
@@ -61,6 +120,7 @@ function Login() {
       <View style={styles.buttonStyleX}>
         <View style={styles.emailInput}>
           <Input
+            onChangeText={(text) => setPassword(text)} // This is the function that will be called when the text changes
             InputLeftElement={
               <Icon
                 as={<FontAwesome5 name="key" />}
@@ -76,7 +136,38 @@ function Login() {
             }
             variant="outline"
             secureTextEntry={true}
-            placeholder="Contraseñas"
+            placeholder="Contraseña"
+            _light={{
+              placeholderTextColor: "blueGray.400",
+            }}
+            _dark={{
+              placeholderTextColor: "blueGray.50",
+            }}
+          />
+        </View>
+      </View>
+
+      {/* Password Input Field */}
+      <View style={styles.buttonStyleX}>
+        <View style={styles.emailInput}>
+          <Input
+            onChangeText={(text) => setConfirmPassword(text)} // This is the function that will be called when the text changes
+            InputLeftElement={
+              <Icon
+                as={<FontAwesome5 name="key" />}
+                size="sm"
+                m={2}
+                _light={{
+                  color: "black",
+                }}
+                _dark={{
+                  color: "gray.300",
+                }}
+              />
+            }
+            variant="outline"
+            secureTextEntry={true}
+            placeholder="Confirma contraseña"
             _light={{
               placeholderTextColor: "blueGray.400",
             }}
@@ -89,7 +180,9 @@ function Login() {
 
       {/* Button */}
       <View style={styles.buttonStyle}>
-        <Button style={styles.buttonDesign}>Ingresar</Button>
+        <Button onPress={handleSignUp} style={styles.buttonDesign}>
+          ¡Registrar ahora!
+        </Button>
       </View>
 
       {/* Line */}
@@ -191,12 +284,12 @@ function Login() {
       <StatusBar style="auto" />
     </View>
   );
-}
+};
 
 export default () => {
   return (
     <NativeBaseProvider>
-      <Login />
+      <SignUp />
     </NativeBaseProvider>
   );
 };
@@ -220,7 +313,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingTop: 5,
   },
-  signupText: {
+  signUpText: {
     fontWeight: "bold",
   },
   emailField: {
