@@ -19,6 +19,7 @@ import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "../authentication/firebase-config";
 
 const Login = () => {
+
   const navigation = useNavigation();
 
   const [email, setEmail] = React.useState("");
@@ -132,9 +133,10 @@ const Login = () => {
       </View>
 
       {/* Box */}
+      {/* {signInWithGoogleAsync()} */}
       <View style={styles.boxStyle}>
         <Box
-          onPress={() => navigation.navigate("#")} // for navigation
+          onPress={() =>  navigation.navigate("#")} // for navigation
           style={{ height: 80, width: 80 }}
           shadow={3}
           _light={{

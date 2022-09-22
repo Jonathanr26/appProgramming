@@ -16,34 +16,45 @@ import { useNavigation } from "@react-navigation/native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "../authentication/firebase-config";
+import { collection, addDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+
 
 const SignUp = () => {
   const navigation = useNavigation();
-
+  
+  const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-
+  
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const database = getFirestore(app);
 
-  const handleSignUp = () => {
+  const handleSignUp = async() => {
     
     if(password !== confirmPassword) return Alert.alert("Error", "Las contraseñas no coinciden");
 
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log("User created");
-        const user = userCredential.user;
-        console.log(user);
-        Alert.alert("Usuario registrado con éxito!");
-        navigation.navigate("Login");
-      })
-      .catch((error) => {
-        console.log(error);
-        Alert.alert("Error", error.message);
-      });
+    .then((userCredential) => {
+      const user = userCredential.user;
+      console.log("User created", user);
+      Alert.alert("Usuario registrado con éxito!");
+      navigation.navigate("Login");
+    })
+    .catch((error) => {
+      console.log(error);
+      Alert.alert("Error", error.message);
+    });
+    
+    await addDoc(collection(database, "users"), {
+      username: username,
+      email: email,
+      password: password,
+    });
   };
+ 
 
   return (
     <View style={styles.container}>
@@ -61,6 +72,8 @@ const SignUp = () => {
       <View style={styles.buttonStyle}>
         <View style={styles.emailInput}>
           <Input
+            onChangeText={(text) => setUsername(text)}
+            value={username}
             InputLeftElement={
               <Icon
                 as={<FontAwesome5 name="user-secret" />}
@@ -91,6 +104,8 @@ const SignUp = () => {
         <View style={styles.emailInput}>
           <Input
             onChangeText={(text) => setEmail(text)} // This is the function that will be called when the text changes
+            value={email}
+            autoCapitalize="none"
             InputLeftElement={
               <Icon
                 as={<MaterialCommunityIcons name="email" />}
@@ -121,6 +136,7 @@ const SignUp = () => {
         <View style={styles.emailInput}>
           <Input
             onChangeText={(text) => setPassword(text)} // This is the function that will be called when the text changes
+            value={password}
             InputLeftElement={
               <Icon
                 as={<FontAwesome5 name="key" />}
@@ -152,6 +168,7 @@ const SignUp = () => {
         <View style={styles.emailInput}>
           <Input
             onChangeText={(text) => setConfirmPassword(text)} // This is the function that will be called when the text changes
+            value={confirmPassword}
             InputLeftElement={
               <Icon
                 as={<FontAwesome5 name="key" />}
